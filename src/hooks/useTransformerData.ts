@@ -133,14 +133,15 @@ export function useTransformerData() {
 
     // For demo purposes, enable demo mode immediately in development
     // In production, remove or adjust this timeout
+    let demoCleanup: (() => void) | undefined;
     const demoTimeout = setTimeout(() => {
       console.log('[DEMO] Enabling demo mode for preview');
-      const cleanup = enableDemoMode();
-      return cleanup;
+      demoCleanup = enableDemoMode();
     }, 1000); // Reduced to 1 second for quicker demo activation
 
     return () => {
       clearTimeout(demoTimeout);
+      if (demoCleanup) demoCleanup();
       if (wsRef.current) wsRef.current.close();
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
