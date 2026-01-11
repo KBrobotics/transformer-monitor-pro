@@ -1,0 +1,78 @@
+[
+    {
+        "id": "transformer-websocket",
+        "type": "websocket out",
+        "z": "flow-id",
+        "name": "Dashboard WS",
+        "server": "ws-server",
+        "client": "",
+        "x": 590,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "ws-server",
+        "type": "websocket-listener",
+        "path": "/transformer",
+        "wholemsg": "false"
+    },
+    {
+        "id": "format-signals",
+        "type": "function",
+        "z": "flow-id",
+        "name": "Format Signals",
+        "func": "// Map your PLC/RTU signals to dashboard format\n// Adjust the property names based on your data source\n\nmsg.payload = {\n    \"LV L1 Winding temperature\": msg.payload.temp_l1 || null,\n    \"LV L3 Winding temperature\": msg.payload.temp_l3 || null,\n    \"Temp alarm1\": msg.payload.alarm1 || false,\n    \"Temp alarm2\": msg.payload.alarm2 || false,\n    \"Transformer trip\": msg.payload.trip || false,\n    \"Transformer alarm\": msg.payload.alarm || false,\n    \"Cooling bank working\": msg.payload.cooling_ok || false,\n    \"Cooling bank failure\": msg.payload.cooling_fail || false\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 200,
+        "wires": [["transformer-websocket"]]
+    },
+    {
+        "id": "rest-endpoint",
+        "type": "http in",
+        "z": "flow-id",
+        "name": "GET /transformer",
+        "url": "/transformer",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 300,
+        "wires": [["get-latest"]]
+    },
+    {
+        "id": "get-latest",
+        "type": "function",
+        "z": "flow-id",
+        "name": "Get Latest Values",
+        "func": "// Return the latest stored values\n// You should store values in flow context from your main data flow\n\nmsg.payload = flow.get('latestSignals') || {\n    \"LV L1 Winding temperature\": null,\n    \"LV L3 Winding temperature\": null,\n    \"Temp alarm1\": false,\n    \"Temp alarm2\": false,\n    \"Transformer trip\": false,\n    \"Transformer alarm\": false,\n    \"Cooling bank working\": false,\n    \"Cooling bank failure\": false\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 300,
+        "wires": [["rest-response"]]
+    },
+    {
+        "id": "rest-response",
+        "type": "http response",
+        "z": "flow-id",
+        "name": "Response",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "x": 580,
+        "y": 300,
+        "wires": []
+    }
+]

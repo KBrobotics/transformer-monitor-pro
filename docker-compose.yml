@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  transformer-dashboard:
+    build: .
+    container_name: transformer-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - industrial-network
+    labels:
+      - "com.docker.compose.project=transformer-monitor"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  industrial-network:
+    driver: bridge
+    # Connect to existing Node-RED network if needed
+    # external: true
+    # name: nodered_network
