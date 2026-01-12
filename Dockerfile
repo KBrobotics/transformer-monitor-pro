@@ -1,5 +1,5 @@
-# Build stage - using explicit platform for ARM compatibility
-FROM --platform=${TARGETPLATFORM:-linux/arm64} node:20-alpine AS build
+# Build stage
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -17,8 +17,8 @@ ENV CI=false
 ENV TSC_COMPILE_ON_ERROR=true
 RUN npm run build
 
-# Production stage - using explicit platform for ARM compatibility
-FROM --platform=${TARGETPLATFORM:-linux/arm64} nginx:alpine
+# Production stage
+FROM nginx:alpine
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
